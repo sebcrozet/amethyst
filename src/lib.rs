@@ -71,6 +71,7 @@ pub extern crate amethyst_locale as locale;
 pub extern crate amethyst_renderer as renderer;
 pub extern crate amethyst_ui as ui;
 pub extern crate amethyst_utils as utils;
+pub extern crate amethyst_xr as xr;
 pub extern crate winit;
 
 extern crate amethyst_ui;
