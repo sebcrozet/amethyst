@@ -1,59 +1,37 @@
-# Set up the Rust toolchain.
-language: rust
-rust:
-  - stable
-  - beta
-  - nightly
+sudo: required
 
-# Allow for occasional compiler breakage on nightly Rust.
+language: generic
+
+services:
+- docker
+
 matrix:
+  fast_finish: true
+  include:
+  - os: linux
+    env: CHANNEL=stable
+  - os: linux
+    env: CHANNEL=stable
+    if: type != pull_request
+  - os: linux
+    env: CHANNEL=nightly
+    if: type != pull_request
   allow_failures:
-    - rust: nightly
+  - env: CHANNEL=nightly
 
 # Build the Bors staging and trying branches, plus PRs to master, and
 # the latest release branch.
 branches:
   only:
-    - staging
-    - trying
-    - develop
-    - master
-    - /release-.*/
-
-# Test on Linux - OSX builds take in excess of 5 hours to start as of 2017-09-19.
-os:
-  - linux
-  - osx
-
-# Install ALSA development libraries before compiling on Linux.
-addons:
-  apt:
-    packages:
-      - libasound2-dev
-      - libsdl2-dev
+  - staging
+  - trying
+  - master
+  - /release-.*/
 
 # Install SDL development libraries from homebrew on macOS
 before_install:
- - "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew update && brew install sdl2; fi"
-
-# This build doesn't require sudo, but turning it on gives us more disk space
-# We need the extra space as we keep running out.
-sudo: required
-
-# Force third-party crates to persist from previous builds and update only when
-# needed.
-cache: 
-  - cargo
-
-# Allow binaries installed from Cargo.
-before_script:
-  - export PATH=$PATH:/home/travis/.cargo/bin
+- "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew update && brew install sdl2; fi"
 
 # Generate documentation, compile the engine, run tests.
-script: bash travis.sh
-
-# Push notifications to `amethyst/general` and `amethyst/engine` Gitter chats.
-notifications:
-  webhooks:
-    urls:
-      - https://webhooks.gitter.im/e/9735c01977c1df3de5cb
+script:
+- docker run -v .:/amethyst magnonellie/amethyst-docker-cache 'mv ../target target && sh travis.sh'
