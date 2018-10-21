@@ -1,7 +1,7 @@
 use amethyst::{
     assets::{AssetStorage, Loader},
     core::{
-        cgmath::{Matrix4, Vector3},
+        nalgebra::{Translation, Vector3},
         transform::{GlobalTransform, Transform},
     },
     ecs::prelude::World,
@@ -125,7 +125,7 @@ fn initialise_camera(world: &mut World) {
             0.0,
         )))
         .with(GlobalTransform(
-            Matrix4::from_translation(Vector3::new(0.0, 0.0, 1.0)).into(),
+            Translation::from_vector(Vector3::new(0.0, 0.0, 1.0)).to_homogeneous(),
         ))
         .build();
 }
@@ -146,8 +146,8 @@ fn initialise_paddles(world: &mut World, sprite_sheet_handle: SpriteSheetHandle)
 
     // Correctly position the paddles.
     let y = (ARENA_HEIGHT - PADDLE_HEIGHT) / 2.0;
-    left_transform.translation = Vector3::new(PADDLE_WIDTH * 0.5, y, 0.0);
-    right_transform.translation = Vector3::new(ARENA_WIDTH - PADDLE_WIDTH * 0.5, y, 0.0);
+    *left_transform.translation_mut() = Vector3::new(PADDLE_WIDTH * 0.5, y, 0.0);
+    *right_transform.translation_mut() = Vector3::new(ARENA_WIDTH - PADDLE_WIDTH * 0.5, y, 0.0);
 
     // Assign the sprites for the paddles
     let sprite_render_left = SpriteRender {
@@ -197,7 +197,7 @@ fn initialise_ball(world: &mut World, sprite_sheet_handle: SpriteSheetHandle) {
 
     // Create the translation.
     let mut local_transform = Transform::default();
-    local_transform.translation = Vector3::new(ARENA_WIDTH / 2.0, ARENA_HEIGHT / 2.0, 0.0);
+    *local_transform.translation_mut() = Vector3::new(ARENA_WIDTH / 2.0, ARENA_HEIGHT / 2.0, 0.0);
 
     // Assign the sprite for the ball
     let sprite_render = SpriteRender {

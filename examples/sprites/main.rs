@@ -23,7 +23,7 @@ use amethyst::{
     },
     assets::{AssetStorage, Loader},
     core::{
-        cgmath::{Matrix4, Point3, Transform as CgTransform, Vector3},
+        nalgebra::{Matrix4, Vector3},
         transform::{GlobalTransform, Transform, TransformBundle},
     },
     ecs::prelude::Entity,
@@ -69,11 +69,11 @@ impl<'a, 'b> SimpleState<'a, 'b> for Example {
         };
         // This `Transform` moves the sprites to the middle of the window
         let mut common_transform = Transform::default();
-        common_transform.translation = Vector3::new(
+        common_transform.set_position(Vector3::new(
             width / 2. - sprite_offset_x,
             height / 2. - sprite_offset_y,
             0.,
-        );
+        ));
 
         self.draw_sprites_regular(
             world,
@@ -114,12 +114,9 @@ impl Example {
         // Create an entity per sprite.
         for i in 0..sprite_count {
             let mut sprite_transform = Transform::default();
-            sprite_transform.translation = Vector3::new(i as f32 * sprite_w, 0., 0.);
+            sprite_transform.set_position(Vector3::new(i as f32 * sprite_w, 0., 0.));
 
-            // This combines multiple `Transform`ations.
-            // You need to `use amethyst::core::cgmath::Transform`;
-
-            CgTransform::<Point3<f32>>::concat_self(&mut sprite_transform, &common_transform);
+            sprite_transform.concat(&common_transform);
 
             let sprite_render = SpriteRender {
                 sprite_sheet: sprite_sheet_handle.clone(),
@@ -157,9 +154,9 @@ impl Example {
         // Create an entity per sprite.
         for i in 0..sprite_count {
             let mut sprite_transform = Transform::default();
-            sprite_transform.translation = Vector3::new(i as f32 * sprite_w, sprite_h * 1.25, 0.);
+            sprite_transform.set_position(Vector3::new(i as f32 * sprite_w, sprite_h * 1.25, 0.));
 
-            CgTransform::<Point3<f32>>::concat_self(&mut sprite_transform, &common_transform);
+            sprite_transform.concat(&common_transform);
 
             let sprite_render = SpriteRender {
                 sprite_sheet: sprite_sheet_handle.clone(),
@@ -202,9 +199,9 @@ impl Example {
         // Create an entity per sprite.
         for i in 0..sprite_count {
             let mut sprite_transform = Transform::default();
-            sprite_transform.translation = Vector3::new(i as f32 * sprite_w, sprite_h * 2.5, 0.);
+            sprite_transform.set_position(Vector3::new(i as f32 * sprite_w, sprite_h * 2.5, 0.));
 
-            CgTransform::<Point3<f32>>::concat_self(&mut sprite_transform, &common_transform);
+            sprite_transform.concat(&common_transform);
 
             let sprite_render = SpriteRender {
                 sprite_sheet: sprite_sheet_handle.clone(),
@@ -312,9 +309,9 @@ fn initialise_camera(world: &mut World) -> Entity {
         .create_entity()
         .with(Camera::from(Projection::orthographic(
             0.0, width, height, 0.0,
-        ))).with(GlobalTransform(Matrix4::from_translation(
-            Vector3::new(0.0, 0.0, 1.0).into(),
-        ))).build()
+        ))).with(GlobalTransform(Matrix4::new_translation(&Vector3::new(
+            0.0, 0.0, 1.0,
+        )))).build()
 }
 
 fn main() -> amethyst::Result<()> {
